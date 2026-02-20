@@ -1,12 +1,6 @@
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
 import streamlit as st
-import base64
-
-#Ensured that base64_image is embedded correctly in the background-image URL.
-def get_base64_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()
 
 template = """
 Answer the question below.
@@ -28,19 +22,6 @@ if 'context' not in st.session_state:
 
 def handle_conversation():
 
-    image_path = "llamaImage.png" 
-    base64_image = get_base64_image(image_path)
-
-    background_css = f"""
-        <style>
-            .stApp {{
-                background-image: url("data:image/png;base64,{base64_image}");
-                background-size: cover;
-                
-                background-repeat: no-repeat;
-            }}
-        </style>
-    """
     title_css = """
         <style>
             .title {
@@ -48,8 +29,7 @@ def handle_conversation():
             }
         </style>
     """
-    
-    st.markdown(background_css, unsafe_allow_html=True)
+
     st.markdown(title_css, unsafe_allow_html=True)
     st.sidebar.markdown('<h1 class="title">Welcome to Ollama!!</h1>', unsafe_allow_html=True)
     st.sidebar.markdown("Type 'exit' to clear my message.")
@@ -75,6 +55,15 @@ def handle_conversation():
         
 
 if __name__ == "__main__":
-    handle_conversation()
+    from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
+
+    # If not already running under Streamlit (e.g. user ran `python main.py`), launch via streamlit run
+    if get_script_run_ctx() is None:
+        import sys
+        import streamlit.web.cli as stcli
+        sys.argv = ["streamlit", "run", __file__] + sys.argv[1:]
+        sys.exit(stcli.main())
+    else:
+        handle_conversation()
 
 
